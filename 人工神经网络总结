@@ -1,0 +1,689 @@
+机器学习（基于python学习）
+目录
+1	人工神经网络：	2
+2	基础内容：	3
+2.1	numpy	3
+2.2	Pandas	5
+3	以一个简单的实例学习神经网络	11
+4	、人工神经网络原理	12
+4.1	人工神经网络的流程：	12
+4.2	反向传播的方法（目的是更新W，b的值，从而优化人工神经网络）	14
+4.3	Tensorflow（很好用的工具，主要作用于人工神经网络）	22
+4.4	训练人工神经网络的五大方法：	23
+5	小实例	30
+5.1	代码：	30
+5.2	效果：	32
+
+
+1	人工神经网络：
+ 
+简单理解：
+个人理解人工神经网络其实就是多个y=w1*x1+ w2*x2+ w3*x3.。。。。。。的叠加，而目的就是解决w1、w2这些参数的具体数值是什么！
+激励函数：目的是让线性函数可以弯曲，而且激励函数必须可微。
+目标函数：每一层都是通过矩阵的乘法进行计算得出下一层的输入值，当计算出最终的输出结果时，就会得到预测的y值，只需要（（predict_y-y）**2）求平均值就能得出loss，而我们的目标就是减小这个loss。而减小这个损失值，就需要利用梯度正负来更新参数，（例如反向传播算法），可以用来计算Whj这个参数对整体误差有多少影响。
+
+ 
+ 
+ 
+根据误差和学习率就可以更新相对的参数。从而实现提高神经网络的准确度。
+后面有详细的人工神经网络的原理介绍。
+2	基础内容：
+     首先需要学习2个库，第一个库是numpy，这个库主要相当于集成了矩阵的存储、运算。在网上有numpy的详细教程，我这里先简单介绍些常用的功能：
+2.1	numpy
+1、numpy属性：
+array = np.array([[1,2,3],[2,3,4]])  #列表转化为矩阵
+print('number of dim:',array.ndim)  # 维度
+# number of dim: 2
+print('shape :',array.shape)    # 行数和列数
+# shape : (2, 3)
+print('size:',array.size)   # 元素个数
+# size: 6
+2、numpy的创建array
+a = np.array([2,23,4])  # list 1d
+a = np.array([2,23,4],dtype=np.int) # 可以指定数据类型
+a = np.zeros((3,4)) # 数据全为0，3行4列
+a = np.empty((3,4)) # 数据为empty，3行4列
+a = np.arange(10,20,2) # 10-19 的数据，2步长
+还有其他创建方法：其他请大家自己网上搜寻
+3、numpy的基础运算：
+矩阵包括减法、加法、乘法，矩阵c=a*b；是对应相乘，还有就是矩阵的正常乘法：
+c= np.dot(a,b)
+c= a.dot(b)
+还包括：
+c=10*np.sin(a)  # sin函数
+np.sum(a)   # 求和
+np.min(a)   # 求最小值
+np.max(a)   # 求最大值
+np.mean(A)  # 求平均值
+np.average(A) # 求均值
+np.cumsum(A)) # 求累加函数
+等其他，请自行搜索
+4、numpy索引：
+A[1][1]、A[1, 1]、A[1, 1:3]
+
+for row in A:    # 按行输出
+    print(row)
+矩阵的转置：A.T
+for column in A.T:  # 按列输出
+    print(column)
+5、矩阵的合并
+A = np.array([1,1,1])
+B = np.array([2,2,2])
+D = np.vstack((A,B))    # vertical stack 属于上下合并
+D = np.hstack((A,B))    # horizontal stack 属于左右合并
+C = np.concatenate((A,B,B,A),axis=0) #使用concatenate函数能合并多个矩阵或者序列，axis参数很好的控制了矩阵的纵向或是横向打印
+6、矩阵的分割
+np.split(A, 2, axis=1) #第一个参数是矩阵，第二个参数是分成的个数，第三个参数是按行分还是按列分
+np.array_split(A, 3, axis=1) #这个函数可以实现矩阵的不等量分割
+7、矩阵的浅复制，深复制
+B=A #浅复制
+b = a.copy()    # 深复制
+2.2	Pandas
+1、	简单定义：Pandas是基于Numpy构建的，Pandas是字典形式。
+s = pd.Series([1,3,6,np.nan,44,1]) # 建立，会默认0-5的索引，打印效果是：
+0     1.0
+1     3.0
+2     6.0
+3     NaN
+4    44.0
+5     1.0
+dtype: float64
+df = pd.DataFrame(np.random.randn(6,4),index=dates,columns=['a','b','c','d']) #第一个参数随机生成6行四列数据，第二个参数是列索引是日期，第三个参数是行索引，打印效果：
+                  a         b         c         d
+2016-01-01 -0.253065 -2.071051 -0.640515  0.613663
+2016-01-02 -1.147178  1.532470  0.989255 -0.499761
+2016-01-03  1.221656 -2.390171  1.862914  0.778070
+2016-01-04  1.473877 -0.046419  0.610046  0.204672
+2016-01-05 -1.584752 -0.700592  1.487264 -1.778293
+2016-01-06  0.633675 -1.414157 -0.277066 -0.442545
+转置与numpy相同
+df.sort_index(axis=1, ascending=False)) #对列索引进行排序
+df2.sort_values(by='B') #对列索引名为B的列进行排序进行排序
+2、Pandas处理NaN数据
+df.dropna(
+    axis=0,     # 0: 对行进行操作; 1: 对列进行操作
+how='any'   # 'any': 只要存在 NaN 就 drop 掉; 'all': 必须全部是 NaN 才 drop ) 
+df.fillna(value=0) # 如果是将 NaN 的值用其他值代替, 比如代替成 0
+3、Pandas导入导出
+data = pandas.read_csv('student.csv') # 读取csv
+data.to_pickle('student.pickle')  # 将资料存取成pickle 
+4、Pandas合并
+#定义资料集
+df1 = pd.DataFrame(np.ones((3,4))*0, columns=['a','b','c','d'])
+df2 = pd.DataFrame(np.ones((3,4))*1, columns=['a','b','c','d'])
+df3 = pd.DataFrame(np.ones((3,4))*2, columns=['a','b','c','d'])
+#concat纵向合并
+res = pd.concat([df1, df2, df3], axis=0)
+#打印结果
+print(res)
+#     a    b    c    d
+# 0  0.0  0.0  0.0  0.0
+# 1  0.0  0.0  0.0  0.0
+# 2  0.0  0.0  0.0  0.0
+# 0  1.0  1.0  1.0  1.0
+# 1  1.0  1.0  1.0  1.0
+# 2  1.0  1.0  1.0  1.0
+# 0  2.0  2.0  2.0  2.0
+# 1  2.0  2.0  2.0  2.0
+# 2  2.0  2.0  2.0  2.0
+#承上一个例子，并将index_ignore设定为True
+res = pd.concat([df1, df2, df3], axis=0, ignore_index=True)
+#打印结果
+print(res)
+#     a    b    c    d
+# 0  0.0  0.0  0.0  0.0
+# 1  0.0  0.0  0.0  0.0
+# 2  0.0  0.0  0.0  0.0
+# 3  1.0  1.0  1.0  1.0
+# 4  1.0  1.0  1.0  1.0
+# 5  1.0  1.0  1.0  1.0
+# 6  2.0  2.0  2.0  2.0
+# 7  2.0  2.0  2.0  2.0
+# 8  2.0  2.0  2.0  2.0
+Join（合并）join='outer'为预设值，因此未设定任何参数时，函数默认join='outer'。此方式是依照column来做纵向合并，有相同的column上下合并在一起，其他独自的column个自成列，原本没有值的位置皆以NaN填充。
+#定义资料集
+df1 = pd.DataFrame(np.ones((3,4))*0, columns=['a','b','c','d'], index=[1,2,3])
+df2 = pd.DataFrame(np.ones((3,4))*1, columns=['b','c','d','e'], index=[2,3,4])
+#纵向"外"合并df1与df2
+res = pd.concat([df1, df2], axis=0, join='outer')
+print(res)
+#     a    b    c    d    e
+# 1  0.0  0.0  0.0  0.0  NaN
+# 2  0.0  0.0  0.0  0.0  NaN
+# 3  0.0  0.0  0.0  0.0  NaN
+# 2  NaN  1.0  1.0  1.0  1.0
+# 3  NaN  1.0  1.0  1.0  1.0
+# 4  NaN  1.0  1.0  1.0  1.0
+append (添加数据) 只有纵向合并，没有横向合并相当于尾部添加 
+5、Pandas合并merge
+#定义资料集并打印出
+left = pd.DataFrame({'key1': ['K0', 'K0', 'K1', 'K2'],
+                      'key2': ['K0', 'K1', 'K0', 'K1'],
+                      'A': ['A0', 'A1', 'A2', 'A3'],
+                      'B': ['B0', 'B1', 'B2', 'B3']})
+right = pd.DataFrame({'key1': ['K0', 'K1', 'K1', 'K2'],
+                       'key2': ['K0', 'K0', 'K0', 'K0'],
+                       'C': ['C0', 'C1', 'C2', 'C3'],
+                       'D': ['D0', 'D1', 'D2', 'D3']})
+
+print(left)
+#    A   B key1 key2
+# 0  A0  B0   K0   K0
+# 1  A1  B1   K0   K1
+# 2  A2  B2   K1   K0
+# 3  A3  B3   K2   K1
+print(right)
+#    C   D key1 key2
+# 0  C0  D0   K0   K0
+# 1  C1  D1   K1   K0
+# 2  C2  D2   K1   K0
+# 3  C3  D3   K2   K0
+#依据key1与key2 columns进行合并，并打印出四种结果['left', 'right', 'outer', 'inner']
+res = pd.merge(left, right, on=['key1', 'key2'], how='inner')
+print(res)
+#    A   B key1 key2   C   D
+# 0  A0  B0   K0   K0  C0  D0
+# 1  A2  B2   K1   K0  C1  D1
+# 2  A2  B2   K1   K0  C2  D2
+res = pd.merge(left, right, on=['key1', 'key2'], how='outer')
+print(res)
+#     A    B key1 key2    C    D
+# 0   A0   B0   K0   K0   C0   D0
+# 1   A1   B1   K0   K1  NaN  NaN
+# 2   A2   B2   K1   K0   C1   D1
+# 3   A2   B2   K1   K0   C2   D2
+# 4   A3   B3   K2   K1  NaN  NaN
+# 5  NaN  NaN   K2   K0   C3   D3
+res = pd.merge(left, right, on=['key1', 'key2'], how='left')
+print(res)
+#    A   B key1 key2    C    D
+# 0  A0  B0   K0   K0   C0   D0
+# 1  A1  B1   K0   K1  NaN  NaN
+# 2  A2  B2   K1   K0   C1   D1
+# 3  A2  B2   K1   K0   C2   D2
+# 4  A3  B3   K2   K1  NaN  NaN
+res = pd.merge(left, right, on=['key1', 'key2'], how='right')
+print(res)
+#     A    B key1 key2   C   D
+# 0   A0   B0   K0   K0  C0  D0
+# 1   A2   B2   K1   K0  C1  D1
+# 2   A2   B2   K1   K0  C2  D2
+# 3  NaN  NaN   K2   K0  C3  D3
+3	以一个简单的实例学习神经网络
+import tensorflow as tf # 是google创建的神经网络库
+import numpy as np
+x_data =np.random.rand(100).astype(np.float32) #创建100个0到1以内的随机数列，类型float32
+y_data =x_data*0.1 + 0.3                       #根据创建的随机数x根据公式获取对应的y值
+
+Weights = tf.Variable(tf.random_uniform([1],-1.0,1.0))#初始化参数变量结构是1维，范围-1到1
+biases = tf.Variable(tf.zeros([1]))           #初始化biases结构是1维，值是0
+
+y = Weights*x_data +biases                     #预测得到的y值。
+
+#loss就是预测y值与实际数值有进行差值，进行平方，再求平均值。
+loss = tf.reduce_mean(tf.square(y-y_data))    
+#优化器是GradientDescentOptimizer，以0.5的学习效率进行学习
+optimizer = tf.train.GradientDescentOptimizer(0.5)
+#目标是最小化loss
+train = optimizer.minimize(loss)
+
+#将上面建立的变量进行初始化
+init = tf.initialize_all_variables()
+
+###createtensorflow structure end  ###
+#神经网络的会话，类似指针，用来指向输出到什么位置
+sess = tf.Session()
+#激活init
+sess.run(init)              #very important
+#进行训练的次数
+for step in range(201):
+    sess.run(train)  #每run一次，相当于训练一次
+    if step % 20 == 0:
+        print(step,sess.run(Weights),sess.run(biases)) #输出步数，和每次学习后的w，b 
+4	、人工神经网络原理
+4.1	人工神经网络的流程：
+首先人工神经网络的图像表示：
+ 
+这是典型的三层神经网络的基本构成，Layer L1是输入层，Layer L2是隐含层，Layer L3是隐含层，我们现在手里有一堆数据{x1,x2,x3,...,xn},输出也是一堆数据{y1,y2,y3,...,yn},现在要他们在隐含层做某种变换，让你把数据灌进去后得到你期望的输出。
+流程是：
+搭建层数，初始化W，b    ->  选择激励函数   ->   计算误差值   -> 选择反向传播方法，用来更新W，b，从而实现人工神经网络的学习。
+1、首先需要搭建神经网络的层数，即搭建矩阵，主要目标是先初始化W和b的值。
+命令是：
+Weights = tf.Variable(tf.random_normal([2, 3]))#创建0-1随机数以2行3列的矩阵
+biases = tf.Variable(tf.zeros([1, 3]) + 0.1)#创建1行3列的随机数，并加上0.1
+Wx_plus_b = tf.matmul(inputs, Weights) + biases #结合W和b得出结果
+以上过程相当于创建了一层神经网络（L2），并初始化W和b的参数。
+2、为创建的层数添加激励函数，主要目的是将线性函数掰弯
+命令是：
+outputs = activation_function(Wx_plus_b)#activation_function函数包含很多
+activation Functions:
+sigmoid:f(x)=1/1+e^(-x)
+tanh: tanh(x)=2sigmoid(2x)−1
+ReLU: f(x)=max(0,x)
+Leaky-ReLU、P-ReLU、R-ReLU: f(x)=αx，(x<0),    f(x)=x，(x>=0)
+Maxout: fi(x)=maxj∈[1,k]zij                   f(x)=max(wT1x+b1,wT2x+b2)
+3、就算loss：
+命令：
+#先进行预测y与实际y做差，再求平方，再求和，再求平均误差，reduction_indices参数
+loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction),reduction_indices=[1]))
+reduction_indices参数，表示函数处理维度
+ 
+4、下一步就是选择方法进行反向传播，目的是更新W，b的参数
+命令：
+# 运用的是梯度下降的方法，学习率是0.1，学习率是参数人为设置，目的是最小化loss，来更新W,b
+train_step = tf.train.GradientDescentOptimizer(0.1).minimize(loss)
+下文会附一个详细的反向传播的解释。
+4.2	反向传播的方法（目的是更新W，b的值，从而优化人工神经网络）
+
+1.计算总误差
+总误差：(square error)
+ 
+但是有两个输出，所以分别计算o1和o2的误差，总误差为两者之和：
+ 
+ 
+ 
+ 
+2.隐含层---->输出层的权值更新：
+以权重参数w5为例，如果我们想知道w5对整体误差产生了多少影响，可以用整体误差对w5求偏导求出：（链式法则）
+ 
+下面的图可以更直观的看清楚误差是怎样反向传播的：
+ 
+现在我们来分别计算每个式子的值：
+计算 ：
+ 
+计算 ：
+ 
+（这一步实际上就是对sigmoid函数求导，比较简单，可以自己推导一下）
+ 
+计算 ：
+ 
+最后三者相乘：
+ 
+这样我们就计算出整体误差E(total)对w5的偏导值。
+回过头来再看看上面的公式，我们发现：
+ 
+为了表达方便，用 来表示输出层的误差：
+ 
+因此，整体误差E(total)对w5的偏导公式可以写成：
+ 
+如果输出层误差计为负的话，也可以写成：
+ 
+最后我们来更新w5的值：
+ 
+（其中， 是学习速率，这里我们取0.5）
+同理，可更新w6,w7,w8:
+ 
+ 
+3.隐含层---->隐含层的权值更新：
+　方法其实与上面说的差不多，但是有个地方需要变一下，在上文计算总误差对w5的偏导时，是从out(o1)---->net(o1)---->w5,但是在隐含层之间的权值更新时，是out(h1)---->net(h1)---->w1,而out(h1)会接受E(o1)和E(o2)两个地方传来的误差，所以这个地方两个都要计算。
+ 
+ 
+ 
+计算 ：
+ 
+先计算 ：
+ 
+ 
+ 
+ 
+同理，计算出：
+　　　　　　　　　　 
+两者相加得到总值：
+ 
+再计算 ：
+ 
+再计算 ：
+ 
+最后，三者相乘：
+ 
+ 为了简化公式，用sigma(h1)表示隐含层单元h1的误差：
+ 
+最后，更新w1的权值：
+ 
+同理，额可更新w2,w3,w4的权值：
+ 
+ 
+　　这样误差反向传播法就完成了，最后我们再把更新的权值重新计算，不停地迭代，在这个例子中第一次迭代之后，总误差E(total)由0.298371109下降至0.291027924。迭代10000次后，总误差为0.000035085，输出为[0.015912196,0.984065734](原输入为[0.01,0.99]),证明效果还是不错的。
+4.3	Tensorflow（很好用的工具，主要作用于人工神经网络）
+Tensorflow 开源，包含大量人工神经的函数，可以直接调用，c++和CUDA（GPU语言）编写，一般在Python中调用。
+TensorFlow™ 是一个采用数据流图（data flow graphs），用于数值计算的开源软件库。节点（Nodes）在图中表示数学操作，图中的线（edges）则表示在节点间相互联系的多维数据数组，即张量（tensor）。它灵活的架构让你可以在多种平台上展开计算，例如台式计算机中的一个或多个CPU（或GPU），服务器，移动设备等等。TensorFlow 最初由Google大脑小组（隶属于Google机器智能研究机构）的研究员和工程师们开发出来，用于机器学习和深度神经网络方面的研究，但这个系统的通用性使其也可广泛用于其他计算领域。
+数据流图：
+数据流图用“结点”（nodes）和“线”(edges)的有向图来描述数学计算。“节点” 一般用来表示施加的数学操作，但也可以表示数据输入（feed in）的起点/输出（push out）的终点，或者是读取/写入持久变量（persistent variable）的终点。“线”表示“节点”之间的输入/输出关系。这些数据“线”可以输运“size可动态调整”的多维数据数组，即“张量”（tensor）。张量从图中流过的直观图像是这个工具取名为“Tensorflow”的原因。一旦输入端的所有张量准备好，节点将被分配到各种计算设备完成异步并行地执行运算。
+当应用到哪些方法时，去对应的方法进行学习，了解方法的原理，参数，返回的结果。
+https://blog.csdn.net/lenbow/article/details/52218551，这个网址有一些tensorflow的讲解
+4.4	训练人工神经网络的五大方法：
+1. 梯度下降法（Gradient descent） 
+梯度下降方法是最简单的训练算法。它仅需要用到梯度向量的信息，因此属于一阶算法。 
+
+我们定义f(wi) = fi and ᐁf(wi) = gi。算法起始于W0点，然后在第i步沿着di = -gi方向从wi移到wi+1，反复迭代直到满足终止条件。梯度下降算法的迭代公式为： 
+
+wi+1 = wi - di·ηi, i=0,1,… 
+
+参数η是学习率。这个参数既可以设置为固定值，也可以用一维优化方法沿着训练的方向逐步更新计算。人们一般倾向于逐步更新计算学习率，但很多软件和工具仍旧使用固定的学习率。 
+
+下图是梯度下降训练方法的流程图。如图所示，参数的更新分为两步：第一步计算梯度下降的方向，第二步计算合适的学习率。 
+
+  
+
+梯度下降方法有一个严重的弊端，若函数的梯度变化如图所示呈现出细长的结构时，该方法需要进行很多次迭代运算。而且，尽管梯度下降的方向就是损失函数值减小最快的方向，但是这并不一定是收敛最快的路径。下图描述了此问题。 
+
+  
+
+当神经网络模型非常庞大、包含上千个参数时，梯度下降方法是我们推荐的算法。因为此方法仅需要存储梯度向量（n空间），而不需要存储海森矩阵（n2空间） 
+
+2.牛顿算法（Newton’s method） 
+因为牛顿算法用到了海森矩阵，所以它属于二阶算法。此算法的目标是使用损失函数的二阶偏导数寻找更好的学习方向。 
+
+我们定义f(wi) = fi, ᐁf(wi) = gi and Hf(wi) = Hi。用泰勒展开式估计函数f在w0值 
+
+f = f0 + g0 · (w - w0) + 0.5 · (w - w0)2 · H0 
+
+H0是函数f在w0的海森矩阵值。在f(w)的最小值处g = 0，我们得到了第二个等式 
+
+g = g0 + H0 · (w - w0) = 0 
+
+因此，将参数初始化在w0，牛顿算法的迭代公式为 
+
+wi+1 = wi - Hi-1·gi, i = 0,1,… 
+
+Hi-1·gi 被称为牛顿项。值得注意的是，如果海森矩阵是一个非正定矩阵，那么参数有可能朝着最大值的方向移动，而不是最小值的方向。因此损失函数值并不能保证在每次迭代都减小。为了避免这种问题，我们通常会对牛顿算法的等式稍作修改： 
+
+wi+1 = wi - (Hi-1·gi) ·ηi, i=0,1,… 
+
+学习率η既可以设为固定值，也可以动态调整。向量d = Hi-1·gi被称为牛顿训练方向。 
+
+下图展示的是牛顿法的流程图。参数的更新也分为两步，计算牛顿训练方向和合适的学习率。 
+
+  
+
+此方法训练神经网络模型的效率被证明比梯度下降法更好。由于共轭梯度法不需要计算海森矩阵，当神经网络模型较大时我们也建议使用。 
+
+4. 柯西-牛顿法（Quasi-Newton method） 
+由于牛顿法需要计算海森矩阵和逆矩阵，需要较多的计算资源，因此出现了一个变种算法，称为柯西-牛顿法，可以弥补计算量大的缺陷。此方法不是直接计算海森矩阵及其逆矩阵，而是在每一次迭代估计计算海森矩阵的逆矩阵，只需要用到损失函数的一阶偏导数。 
+
+海森矩阵是由损失函数的二阶偏导数组成。柯西-牛顿法的主要思想是用另一个矩阵G来估计海森矩阵的逆矩阵，只需要损失函数的一阶偏导数。柯西-牛顿法的更新方程可以写为： 
+
+wi+1 = wi - (Gi·gi)·ηi, i=0,1,… 
+
+学习率η既可以设为固定值，也可以动态调整。海森矩阵逆矩阵的估计G有多种不同类型。两种常用的类型是Davidon–Fletcher–Powell formula (DFP)和Broyden–Fletcher–Goldfarb–Shanno formula (BFGS)。 
+
+柯西-牛顿法的流程图如下所示。参数更新的步骤分为计算柯西-牛顿训练方向和计算学习率。 
+
+  
+
+许多情况下，这是默认选择的算法：它比梯度下降法和共轭梯度法更快，而不需要准确计算海森矩阵及其逆矩阵。 
+
+5. Levenberg-Marquardt算法 
+Levenberg-Marquardt算法又称为衰减的最小 平方法，它针对损失函数是平方和误差的形式。它也不需要准确计算海森矩阵，需要用到梯度向量和雅各布矩阵。 
+
+假设损失函数f是平方和误差的形式： 
+
+f = ∑ ei2, i=0,…,m 
+
+其中m是训练样本的个数。 
+
+我们定义损失函数的雅各布矩阵由误差项对参数的偏导数组成， 
+
+Ji,jf(w) = dei/dwj (i = 1,…,m & j = 1,…,n) 
+
+m是训练集中的样本个数，n是神经网络的参数个数。雅各布矩阵的规模是m·n 
+
+损失函数的梯度向量是： 
+
+ᐁf = 2 JT·e 
+
+e是所有误差项组成的向量。 
+
+最后，我们可以用这个表达式来估计计算海森矩阵。 
+
+Hf ≈ 2 JT·J + λI 
+
+λ是衰减因子，以确保海森矩阵是正的，I是单位矩阵。 
+
+此算法的参数更新公式如下： 
+
+wi+1 = wi - (JiT·Ji+λiI)-1·(2 JiT·ei), i=0,1,… 
+
+若衰减因子λ设为0，相当于是牛顿法。若λ设置的非常大，这就相当于是学习率很小的梯度下降法。 
+
+参数λ的初始值非常大，因此前几步更新是沿着梯度下降方向的。如果某一步迭代更新失败，则λ扩大一些。否则，λ随着损失值的减小而减小，Levenberg-Marquardt接近牛顿法。这个过程可以加快收敛的速度。 
+
+下图是Levenberg-Marquardt算法训练过程的流程图。第一步计算损失值、梯度和近似海森矩阵。然后衰减参数和衰减系数。 
+
+  
+
+由于Levenberg-Marquardt算法主要针对平方和误差类的损失函数。因此，在训练这类误差的神经网络模型时速度非常快。但是这个算法也有一些缺点。首先，它不适用于其它类型的损失函数。而且，它也不兼容正则项。最后，如果训练数据和网络模型非常大，雅各布矩阵也会变得很大，需要很多内存。因此，当训练数据或是模型很大时，我们并不建议使用Levenberg-Marquardt算法。 
+
+内存使用和速度的比较 
+下图绘制了本文讨论的五种算法的计算速度和内存需求。如图所示，梯度下降法往往是最慢的训练方法，它所需要的内存也往往最少。相反，速度最快的算法一般是Levenberg-Marquardt，但需要的内存也更多。柯西-牛顿法较好地平衡了两者。 
+ 
+
+总之，如果我们的神经网络模型有上千个参数，则可以用节省存储的梯度下降法和共轭梯度法。如果我们需要训练很多网络模型，每个模型只有几千个训练数据和几百个参数，则Levenberg-Marquardt可能会是一个好选择。其余情况下，柯西-牛顿法的效果都不错。
+5	小实例
+5.1	代码：
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+def add_layer(inputs, in_size, out_size, activation_function=None):
+    with tf.name_scope("layer"):
+        with tf.name_scope('weights'):
+            Weights = tf.Variable(tf.random_normal([in_size, out_size]),name='W')
+        with tf.name_scope('biases'):
+            biases = tf.Variable(tf.zeros([1, out_size]) + 0.1,name='b')
+        with tf.name_scope('Wx_plus_b'):
+            Wx_plus_b = tf.matmul(inputs, Weights) + biases
+        if activation_function is None:
+            outputs = Wx_plus_b
+        else:
+            outputs = activation_function(Wx_plus_b)
+        return outputs
+x_data = np.linspace(-1,1,300, dtype=np.float32)[:, np.newaxis]
+noise = np.random.normal(0, 0.05, x_data.shape).astype(np.float32)
+y_data = np.square(x_data) - 0.5 + noise
+
+with tf.name_scope("inputs"):
+    xs = tf.placeholder(tf.float32, [None, 1],name='x_in')
+    ys = tf.placeholder(tf.float32, [None, 1],name='y_in')
+
+l1 = add_layer(xs, 1, 10, activation_function=tf.nn.tanh)
+prediction = add_layer(l1, 10, 1, activation_function=None)
+with tf.name_scope('loss'):
+    loss = tf.reduce_mean(tf.reduce_sum(tf.square(ys - prediction),
+                     reduction_indices=[1]))
+with tf.name_scope('train_step'):
+    train_step = tf.train.GradientDescentOptimizer(0.1).minimize(loss)
+init = tf.global_variables_initializer()  # 替换成这样就好
+sess = tf.Session()
+writer = tf.summary.FileWriter("logs/", sess.graph)
+sess.run(init)
+
+fig = plt.figure()
+ax = fig.add_subplot(1,1,1)
+ax.scatter(x_data, y_data)
+plt.ion()#本次运行请注释，全局运行不要注释
+plt.show()
+
+for i in range(10000000):
+    sess.run(train_step, feed_dict={xs: x_data, ys: y_data})
+    if i % 50 == 0:
+        try:
+            ax.lines.remove(lines[0])
+        except Exception:
+            pass
+        prediction_value = sess.run(prediction, feed_dict={xs: x_data})
+        lines = ax.plot(x_data, prediction_value, 'r-', lw=5)
+        plt.pause(0.5)
+plt.pause(10)
+
+5.2	效果：
+ 
+ 
+
+ 
+ 
+6	CNN(卷积神经网络)
+当我们给定一个"X"的图案，计算机怎么识别这个图案就是“X”呢？一个可能的办法就是计算机存储一张标准的“X”图案，然后把需要识别的未知图案跟标准"X"图案进行比对，如果二者一致，则判定未知图案即是一个"X"图案。
+而且即便未知图案可能有一些平移或稍稍变形，依然能辨别出它是一个X图案。如此，CNN是把未知图案和标准X图案一个局部一个局部的对比，如下图：
+ 
+    而未知图案的局部和标准X图案的局部一个一个比对时的计算过程，便是卷积操作。卷积计算结果为1表示匹配，否则不匹配。
+    接下来，我们来了解下什么是卷积操作。
+4.2 什么是卷积
+    对图像（不同的数据窗口数据）和滤波矩阵（一组固定的权重：因为每个神经元的多个权重固定，所以又可以看做一个恒定的滤波器filter）做内积（逐个元素相乘再求和）的操作就是所谓的『卷积』操作，也是卷积神经网络的名字来源。
+    非严格意义上来讲，下图中红框框起来的部分便可以理解为一个滤波器，即带着一组固定权重的神经元。多个滤波器叠加便成了卷积层。
+ 
+    OK，举个具体的例子。比如下图中，图中左边部分是原始输入数据，图中中间部分是滤波器filter，图中右边是输出的新的二维数据。
+ 
+    分解下上图
+
+   对应位置上是数字先相乘后相加   =  
+    中间滤波器filter与数据窗口做内积，其具体计算过程则是：4*0 + 0*0 + 0*0 + 0*0 + 0*1 + 0*1 + 0*0 + 0*1 + -4*2 = -8
+4.3 图像上的卷积
+    在下图对应的计算过程中，输入是一定区域大小(width*height)的数据，和滤波器filter（带着一组固定权重的神经元）做内积后等到新的二维数据。
+    具体来说，左边是图像输入，中间部分就是滤波器filter（带着一组固定权重的神经元），不同的滤波器filter会得到不同的输出数据，比如颜色深浅、轮廓。相当于如果想提取图像的不同特征，则用不同的滤波器filter，提取想要的关于图像的特定信息：颜色深浅或轮廓。
+    如下图所示
+ 
+4.4 GIF动态卷积图
+    在CNN中，滤波器filter（带着一组固定权重的神经元）对局部输入数据进行卷积计算。每计算完一个数据窗口内的局部数据后，数据窗口不断平移滑动，直到计算完所有数据。这个过程中，有这么几个参数： 
+　　a. 深度depth：神经元个数，决定输出的depth厚度。同时代表滤波器个数。
+　　b. 步长stride：决定滑动多少步可以到边缘。
+　　c. 填充值zero-padding：在外围边缘补充若干圈0，方便从初始位置以步长为单位可以刚好滑倒末尾位置，通俗地讲就是为了总长能被步长整除。 
+ 
+cs231n课程中有一张卷积动图，貌似是用d3js 和一个util 画的，我根据cs231n的卷积动图依次截取了18张图，然后用一gif 制图工具制作了一gif 动态卷积图。如下gif 图所示
+ 
+    可以看到：
+两个神经元，即depth=2，意味着有两个滤波器。
+数据窗口每次移动两个步长取3*3的局部数据，即stride=2。
+zero-padding=1。
+    然后分别以两个滤波器filter为轴滑动数组进行卷积计算，得到两组不同的结果。
+
+    如果初看上图，可能不一定能立马理解啥意思，但结合上文的内容后，理解这个动图已经不是很困难的事情：
+
+左边是输入（7*7*3中，7*7代表图像的像素/长宽，3代表R、G、B 三个颜色通道）
+中间部分是两个不同的滤波器Filter w0、Filter w1
+最右边则是两个不同的输出
+    随着左边数据窗口的平移滑动，滤波器Filter w0 / Filter w1对不同的局部数据进行卷积计算。
+
+    值得一提的是：
+
+左边数据在变化，每次滤波器都是针对某一局部的数据窗口进行卷积，这就是所谓的CNN中的局部感知机制。
+打个比方，滤波器就像一双眼睛，人类视角有限，一眼望去，只能看到这世界的局部。如果一眼就看到全世界，你会累死，而且一下子接受全世界所有信息，你大脑接收不过来。当然，即便是看局部，针对局部里的信息人类双眼也是有偏重、偏好的。比如看美女，对脸、胸、腿是重点关注，所以这3个输入的权重相对较大。
+与此同时，数据窗口滑动，导致输入在变化，但中间滤波器Filter w0的权重（即每个神经元连接数据窗口的权重）是固定不变的，这个权重不变即所谓的CNN中的参数（权重）共享机制。
+
+再打个比方，某人环游全世界，所看到的信息在变，但采集信息的双眼不变。btw，不同人的双眼 看同一个局部信息 所感受到的不同，即一千个读者有一千个哈姆雷特，所以不同的滤波器 就像不同的双眼，不同的人有着不同的反馈结果。
+    我第一次看到上面这个动态图的时候，只觉得很炫，另外就是据说计算过程是“相乘后相加”，但到底具体是个怎么相乘后相加的计算过程 则无法一眼看出，网上也没有一目了然的计算过程。本文来细究下。
+
+    首先，我们来分解下上述动图，如下图
+ 
+ 
+
+    接着，我们细究下上图的具体计算过程。即上图中的输出结果1具体是怎么计算得到的呢？其实，类似wx + b，w对应滤波器Filter w0，x对应不同的数据窗口，b对应Bias b0，相当于滤波器Filter w0与一个个数据窗口相乘再求和后，最后加上Bias b0得到输出结果1，如下过程所示：
+  
+1* 0 + 1*0 + -1*0 
++
+-1*0 + 0*0 + 1*1
++
+-1*0 + -1*0 + 0*1
++
+  
+-1*0 + 0*0 + -1*0
++
+0*0 + 0*1 + -1*1
++
+1*0 + -1*0 + 0*2
++
+  
+0*0 + 1*0 + 0*0
++
+1*0 + 0*2 + 1*0
++
+0*0 + -1*0 + 1*0
++
+1
+=
+1
+    然后滤波器Filter w0固定不变，数据窗口向右移动2步，继续做内积计算，得到0的输出结果
+ 
+    最后，换做另外一个不同的滤波器Filter w1、不同的偏置Bias b1，再跟图中最左边的数据窗口做卷积，可得到另外一个不同的输出。
+ 
+5 CNN之激励层与池化层
+5.1 ReLU激励层
+    2.2节介绍了激活函数sigmoid，但实际梯度下降中，sigmoid容易饱和、造成终止梯度传递，且没有0中心化。咋办呢，可以尝试另外一个激活函数：ReLU，其图形表示如下
+ 
+    ReLU的优点是收敛快，求梯度简单。
+
+5.2 池化pool层
+    前头说了，池化，简言之，即取区域平均或最大，如下图所示（图引自cs231n）
+ 
+上图所展示的是取区域最大，即上图左边部分中 左上角2x2的矩阵中6最大，右上角2x2的矩阵中8最大，左下角2x2的矩阵中3最大，右下角2x2的矩阵中4最大，所以得到上图右边部分的结果：6 8 3 4。很简单不是？
+6.1	代码:
+import tensorflow as tf
+from tensorflow.examples.tutorials.mnist import input_data
+mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
+def compute_accuracy(v_xs,v_ys):
+    global prediction
+    y_pre =sess.run(prediction,feed_dict={xs:v_xs,keep_prob: 1.0})
+    correct_prediction= tf.equal(tf.argmax(y_pre,1),tf.argmax(v_ys,1))
+    accuracy =tf.reduce_mean(tf.cast(correct_prediction,tf.float32))
+    result =sess.run(accuracy,feed_dict={xs:v_xs,ys:v_ys,keep_prob: 1.0})
+    return result
+
+def weight_variable(shape):
+    initial= tf.truncated_normal(shape, stddev=0.1)
+    return tf.Variable(initial)
+def bias_variable(shape):
+    initial=tf.constant(0.1, shape=shape)
+    return tf.Variable(initial)
+def conv2d(x,W):
+    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+def max_pool_2x2(x):
+    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1],padding='SAME')
+
+
+
+xs = tf.placeholder(tf.float32, [None, 784]) # 28x28##
+ys = tf.placeholder(tf.float32, [None, 10])
+keep_prob = tf.placeholder(tf.float32)
+x_image=tf.reshape(xs,[-1,28,28,1])   ##最后一个参数，表示三原色只有黑白，所以选择1.##
+#print (x_image.shape)
+
+##conv1 layer##
+W_conv1= weight_variable([5,5,1,32])   ##patch 5*5 ，in size 1,out size 32##
+b_conv1= bias_variable([32])
+h_conv1= tf.nn.relu(conv2d(x_image,W_conv1)+b_conv1) ## output size 28*28*32##
+h_pool1= max_pool_2x2(h_conv1)                        ## output size 14*14*32##
+
+##conv2 layer##
+W_conv2= weight_variable([5,5,32,64])  ##patch 5*5 ，in size 32,out size 64##
+b_conv2= bias_variable([64])
+h_conv2= tf.nn.relu(conv2d(h_pool1,W_conv2)+b_conv2)## output size 14*14*64##
+h_pool2= max_pool_2x2(h_conv2)                      ##output size 7*7*64##
+
+##func1 layer##
+W_fc1 = weight_variable([7*7*64,1024])
+b_fc1 = bias_variable([1024])
+##[n_samples,7,7,64]->>[n_samples,7*7*64]##
+h_pool2_flat=tf.reshape(h_pool2,[-1,7*7*64])
+h_fc1=tf.nn.relu(tf.matmul(h_pool2_flat,W_fc1)+b_fc1)
+h_fc1_drop=tf.nn.dropout(h_fc1, keep_prob)
+
+##func2 layer##
+W_fc2 =weight_variable([1024,10])
+b_fc2 = bias_variable([10])
+prediction=tf.nn.softmax(tf.matmul(h_fc1_drop,W_fc2)+b_fc2)
+
+
+cross_entropy=tf.reduce_mean(-tf.reduce_sum(ys*tf.log(prediction), reduction_indices=[1]))   ##loss##
+train_step= tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+
+sess = tf.Session()
+##tf.initialize_all_variables() 这种写法马上就要被废弃##
+## 替换成下面的写法:##
+sess.run(tf.global_variables_initializer())
+
+for i in range(1000):
+    batch_xs, batch_ys = mnist.train.next_batch(100)
+    sess.run(train_step, feed_dict={xs: batch_xs, ys: batch_ys,keep_prob: 1.0})
+    if i % 50 == 0:
+        print(compute_accuracy(mnist.test.images[0:2000], mnist.test.labels[0:2000]))
+6.2	效果：
+ 
